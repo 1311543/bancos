@@ -21,7 +21,7 @@ public class Banco extends ManejadorBD implements InterfazModelo{
     private String telefono;
     private String paginaweb;
     private String tipoCta;
-    private Pais idPais;
+    private Pais pais;
 
     public Integer getIdBanco() {
         return idBanco;
@@ -83,12 +83,14 @@ public class Banco extends ManejadorBD implements InterfazModelo{
     public void setTipoCta(String tipoCta) {
         this.tipoCta = tipoCta;
     }
-    public Pais getIdPais() {
-        return idPais;
+       public Pais getPais() {
+        return pais;
     }
-    public void setIdPais(Pais idPais) {
-        this.idPais = idPais;
+
+    public void setPais(Pais pais) {
+        this.pais = pais;
     }
+
     
     public String generarCodigo()throws Exception{
         if(getCampo("SELECT MAX(idBanco) as id FROM banco")!=null){
@@ -161,11 +163,11 @@ public class Banco extends ManejadorBD implements InterfazModelo{
         Banco banco=(Banco) objeto;
         String columnas="", valores="";
         
-        mantenimiento("INSERT INTO banco(idBanco,codigo,razonSocial,pseudonimo,numeroCta,moneda,"
-                +"tipoCta,ruc,telefono,paginaweb,idPis"+columnas+")"
+        mantenimiento("INSERT INTO banco(idBanco,codigo,razonSocial,pseudonimo,numeroCta,tipoCta,"
+                +"moneda,ruc,telefono,paginaweb,idPis"+columnas+")"
                 +"VALUES(null,'"+generarCodigo()+"','"+banco.getRazonSocial()+"','"+banco.getPseudonimo()+"',"
-                +"','"+getNumeroCta()+"','"+getMoneda()+"','"+getTipoCta()+"','"+getRuc()+"','"+getTelefono()+"',"
-                +"','"+getPaginaweb()+"',"+getIdPais()+"'" +valores+")");
+                +"','"+banco.getNumeroCta()+"','"+banco.getTipoCta()+"','"+banco.getMoneda()+"','"+banco.getRuc()+"','"+banco.getTelefono()+"',"
+                +"','"+banco.getPaginaweb()+"',"+banco.getPais().getIdPais()+"'" +valores+")");
          
     }
     @Override
@@ -176,11 +178,42 @@ public class Banco extends ManejadorBD implements InterfazModelo{
         mantenimiento("UPDATE banco "
                 + "SET razonSocial='"+banco.getRazonSocial()+"',pseudonimo='"+banco.getPseudonimo()+"',numeroCta='"+getNumeroCta()+"',"
                 + "moneda='"+banco.getMoneda()+"',tipoCta='"+banco.getTipoCta()+"',ruc='"+getRuc()+"',"
-                + "telefono='"+banco.getTelefono()+"',paginaweb='"+getPaginaweb()+"',idPais='"+banco.getIdPais()+"',"+campos+" WHERE idCliente='"+banco.getIdBanco()+"'");
+                + "telefono='"+banco.getTelefono()+"',paginaweb='"+getPaginaweb()+"',idPais='"+banco.getPais()+"',"+campos+" WHERE idCliente='"+banco.getIdBanco()+"'");
     }
     @Override
     public void eliminar(int id) throws Exception {
         mantenimiento("DELETE FROM banco WHERE idBanco='"+id+"'");
     }
-
+@Override
+    public Object buscar(String campo, String valor) throws Exception {
+        Banco banco=new Banco();
+        
+        Object[] fila=getFila("SELECT *FROM banco WHERE "+campo+"='"+valor+"'");
+        if(fila!=null){
+            banco.setIdBanco(Integer.parseInt(fila[0].toString()));
+            banco.setCodigo(fila[1].toString());
+            banco.setPseudonimo(fila[2].toString());
+            banco.setNumeroCta(fila[3].toString());
+            banco.setMoneda(fila[4].toString());
+            if(fila[5]!=null){
+                banco.setTipoCta(fila[5].toString());
+            }
+            if(fila[6]!=null){
+                banco.setRuc(fila[6].toString());
+            }
+            if(fila[7]!=null){
+                banco.setTelefono(fila[7].toString());
+            }
+            if(fila[8]!=null){
+                banco.setPaginaweb(fila[8].toString());
+            }
+            Pais pais=new Pais();
+            pais=(Pais) pais.buscar(Integer.parseInt(fila[18].toString()));
+            banco.setPais(pais);
+            return banco;
+        }else{
+            return null;
+        }
+        
+    }
 }
